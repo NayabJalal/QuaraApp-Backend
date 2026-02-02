@@ -30,16 +30,32 @@ public class QuestionController {
                 .doOnSuccess(response -> System.out.println("Question fetched successfully: " + response))
                 .doOnError(error -> System.out.println("Error fetching question: " + error));
     }
+
     @GetMapping
-    public Flux<QuestionResponseDTO> getAll(){
-        return questionService.findAll()
-                .doOnError(error -> System.out.println("Internal Error: "+ error));
+    public Flux<QuestionResponseDTO> getAllQuestions(
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        return questionService.findAll(cursor, size)
+                .doOnError(error -> System.out.println("Error fetching questions : "+ error))
+                .doOnComplete(() -> System.out.println("Question fetching successfully"));
     }
+
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteById(@PathVariable String id){
         return questionService.deleteById(id)
-                .doOnSuccess(v -> System.out.println("Successfully deleted the Question {}"+id))
-                .doOnError(error -> System.out.println("Failed to delete id {}"+ id));
+                .doOnSuccess(v -> System.out.println("Successfully deleted the Question "+id))
+                .doOnError(error -> System.out.println("Failed to delete id "+ id));
+    }
+
+    @GetMapping("/search")
+    public Flux<QuestionResponseDTO> searchQuestions(
+        @RequestParam String query,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ){
+        return questionService.searchQuestions(query,page,size);
     }
 }

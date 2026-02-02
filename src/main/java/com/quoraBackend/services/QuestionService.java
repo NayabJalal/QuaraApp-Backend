@@ -5,8 +5,11 @@ import com.quoraBackend.dto.QuestionRequestDTO;
 import com.quoraBackend.dto.QuestionResponseDTO;
 import com.quoraBackend.models.Questions;
 import com.quoraBackend.repositories.QuestionRepo;
+import com.quoraBackend.util.CursorUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,10 +48,21 @@ public class QuestionService implements IQuestionService{
     }
 
     @Override
-    public Flux<QuestionResponseDTO> findAll() {
-        return questionRepo.findAll()
-                .map(QuestionAdapter::toQuestionResponseDTO)
-                .doOnError(error -> System.out.println("Internal Error"));
+    public Flux<QuestionResponseDTO> findAll(String cursor , int size) {
+        Pageable pageable = PageRequest.of(0,size);
+        if (!CursorUtils.isValidCursor(cursor)){
+            return questionRepo.findTop10ByOrderByCreatedAtAsc()
+                    .take(size)
+                    .map(QuestionAdapter::toQuestionResponseDTO)
+                    .doOnError(error -> System.out.println("Error Fetching Question"))
+                    .doOnComplete(() -> System.out.println("Question Fetched Successfully: "));
+        } else {
+            LocalDateTime cursorTimeStamp = CursorUtils.parseCursor(cursor);
+            return questionRepo.findByCreatedAtGreaterThanOrderByCreatedAtAsc(cursorTimeStamp , pageable)
+                    .map(QuestionAdapter::toQuestionResponseDTO)
+                    .doOnError(error -> System.out.println("Error Fetching Question"))
+                    .doOnComplete(() -> System.out.println("Question Fetched Successfully: "));
+        }
     }
 
     @Override
@@ -56,5 +70,13 @@ public class QuestionService implements IQuestionService{
         return questionRepo.deleteById(id)
                 .doOnSuccess(v -> System.out.println("Successfully deleted the Question : "+id))
                 .doOnError(error -> System.out.println("Failed to delete id : "+ id));
+    }
+
+    @Override
+    public Flux<QuestionResponseDTO> searchQuestions(String searchTerm, int offset, int page) {
+        return questionRepo.findByTitleOrContentContainingIgnoreCase(searchTerm, PageRequest.of(offset,page))
+                .map(QuestionAdapter::toQuestionResponseDTO)
+                .doOnError(error -> System.out.println("Error finding questions: " + error))
+                .doOnComplete(() -> System.out.println("Questions Searched Successfully"));
     }
 }
