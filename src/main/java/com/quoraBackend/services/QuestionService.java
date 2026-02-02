@@ -6,6 +6,7 @@ import com.quoraBackend.dto.QuestionResponseDTO;
 import com.quoraBackend.models.Questions;
 import com.quoraBackend.repositories.QuestionRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -48,5 +49,12 @@ public class QuestionService implements IQuestionService{
         return questionRepo.findAll()
                 .map(QuestionAdapter::toQuestionResponseDTO)
                 .doOnError(error -> System.out.println("Internal Error"));
+    }
+
+    @Override
+    public Mono<Void> deleteById(String id) {
+        return questionRepo.deleteById(id)
+                .doOnSuccess(v -> System.out.println("Successfully deleted the Question : "+id))
+                .doOnError(error -> System.out.println("Failed to delete id : "+ id));
     }
 }

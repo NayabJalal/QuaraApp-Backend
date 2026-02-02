@@ -4,6 +4,7 @@ import com.quoraBackend.dto.QuestionRequestDTO;
 import com.quoraBackend.dto.QuestionResponseDTO;
 import com.quoraBackend.services.IQuestionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,5 +34,12 @@ public class QuestionController {
     public Flux<QuestionResponseDTO> getAll(){
         return questionService.findAll()
                 .doOnError(error -> System.out.println("Internal Error: "+ error));
+    }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteById(@PathVariable String id){
+        return questionService.deleteById(id)
+                .doOnSuccess(v -> System.out.println("Successfully deleted the Question {}"+id))
+                .doOnError(error -> System.out.println("Failed to delete id {}"+ id));
     }
 }
