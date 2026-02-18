@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -96,5 +95,15 @@ public class QuestionService implements IQuestionService{
                 .map(QuestionAdapter::toQuestionResponseDTO)
                 .doOnError(error -> System.out.println("Error finding questions: " + error))
                 .doOnComplete(() -> System.out.println("Questions Searched Successfully"));
+    }
+
+    @Override
+    public Flux<QuestionResponseDTO> searchByTag(List<String> tag, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<String> normalizedTags = normalizeTags(tag);
+        return questionRepo.findByTagsIn(normalizedTags, pageable)
+                .map(QuestionAdapter::toQuestionResponseDTO)
+                .doOnComplete(() -> System.out.println("Search completed successfully"))
+                .doOnError(error -> System.out.println("Error searching questions" + error));
     }
 }

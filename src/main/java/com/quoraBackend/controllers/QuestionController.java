@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/questions")
@@ -57,5 +59,14 @@ public class QuestionController {
         @RequestParam(defaultValue = "10") int size
     ){
         return questionService.searchQuestions(query,page,size);
+    }
+
+    @GetMapping("/tags")
+    public Flux<QuestionResponseDTO> getByTag(
+            @RequestParam List<String> tag,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        return questionService.searchByTag(tag,page,size);
     }
 }
