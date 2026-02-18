@@ -107,8 +107,6 @@ public class QuestionService implements IQuestionService{
                 .distinct()
                 .sort();
     }
-
-
     @Override
     public Flux<QuestionResponseDTO> searchByTag(List<String> tag, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -117,5 +115,22 @@ public class QuestionService implements IQuestionService{
                 .map(QuestionAdapter::toQuestionResponseDTO)
                 .doOnComplete(() -> System.out.println("Search completed successfully"))
                 .doOnError(error -> System.out.println("Error searching questions" + error));
+    }
+    @Override
+    public Mono<QuestionResponseDTO> deleteTag(String id, String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return Mono.error(new RuntimeException("Tag cannot be empty"));
+        }
+        String normalizedTag = tag.trim().toLowerCase();
+        return questionRepo.removeTagById(id, normalizedTag)
+                .flatMap(updatedCount -> {
+                    if (updatedCount == 0) {
+                        return Mono.error(
+                                new RuntimeException("Question not found or tag not present")
+                        );
+                    }
+                    return questionRepo.findById(id);
+                })
+                .map(QuestionAdapter::toQuestionResponseDTO);
     }
 }

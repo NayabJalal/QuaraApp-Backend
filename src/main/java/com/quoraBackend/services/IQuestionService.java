@@ -15,4 +15,5 @@ public interface IQuestionService {
     public Flux<QuestionResponseDTO> searchQuestions(String searchTerm, int offset, int page);
     public Flux<QuestionResponseDTO> searchByTag(List<String> tag, int page, int size);
     public Flux<String> getAllTags();
+    Mono<QuestionResponseDTO> deleteTag(String id, String tag);
 }

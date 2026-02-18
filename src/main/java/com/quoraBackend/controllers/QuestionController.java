@@ -43,7 +43,6 @@ public class QuestionController {
                 .doOnComplete(() -> System.out.println("Question fetching successfully"));
     }
 
-
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteById(@PathVariable String id){
@@ -74,5 +73,13 @@ public class QuestionController {
             @RequestParam(defaultValue = "10") int size
     ){
         return questionService.searchByTag(tag,page,size);
+    }
+
+    @DeleteMapping("/{id}/tags")
+    public Mono<QuestionResponseDTO> deleteTag(
+            @PathVariable String id,
+            @RequestParam String tag
+    ) {
+        return questionService.deleteTag(id, tag);
     }
 }
