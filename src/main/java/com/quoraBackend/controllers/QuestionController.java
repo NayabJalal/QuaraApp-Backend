@@ -61,6 +61,12 @@ public class QuestionController {
         return questionService.searchQuestions(query,page,size);
     }
 
+    @GetMapping("/tags/all")
+    public Mono<List<String>> getAllTags() {
+        return questionService.getAllTags()
+                .collectList();
+    }
+
     @GetMapping("/tags")
     public Flux<QuestionResponseDTO> getByTag(
             @RequestParam List<String> tag,

@@ -24,5 +24,8 @@ public interface QuestionRepo extends ReactiveMongoRepository<Questions , String
 
     Flux<Questions> findTop10ByOrderByCreatedAtAsc();
 
+    @Query(value = "{}", fields = "{ 'tags' : 1 }")
+    Flux<Questions> findAllTagsOnly();
+
     Flux<Questions> findByTagsIn(List<String> tags, Pageable pageable);
 }

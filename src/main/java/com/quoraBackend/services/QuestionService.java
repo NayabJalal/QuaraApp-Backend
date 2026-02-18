@@ -96,6 +96,18 @@ public class QuestionService implements IQuestionService{
                 .doOnError(error -> System.out.println("Error finding questions: " + error))
                 .doOnComplete(() -> System.out.println("Questions Searched Successfully"));
     }
+    @Override
+    public Flux<String> getAllTags() {
+        return questionRepo.findAllTagsOnly()
+                .flatMap(q -> {
+                    List<String> tags = q.getTags();
+                    return tags == null ? Flux.empty() : Flux.fromIterable(tags);
+                })
+                .filter(Objects::nonNull)
+                .distinct()
+                .sort();
+    }
+
 
     @Override
     public Flux<QuestionResponseDTO> searchByTag(List<String> tag, int page, int size) {
